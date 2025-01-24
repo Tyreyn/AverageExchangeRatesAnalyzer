@@ -1,0 +1,62 @@
+\doxysection{Average\+Exchange\+Rates\+Analyzer.\+File\+Operations.\+Exporters.\+Excel\+Exporter Class Reference}
+\hypertarget{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter}{}\label{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter}\index{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter@{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter}}
+
+
+Responsible for exporting processed data to an \doxylink{namespace_average_exchange_rates_analyzer_1_1_helpers_1_1_excel}{Excel} file. Provides methods for creating and saving \doxylink{namespace_average_exchange_rates_analyzer_1_1_helpers_1_1_excel}{Excel} files with the given data.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter_aae6a2ca3e336e73466b5710bd5dcd6a9}{Excel\+Exporter}} (ILogger logger, Date\+Time current\+Date)
+\begin{DoxyCompactList}\small\item\em Initializes a new instance of the \doxylink{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter}{Excel\+Exporter} class. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter_ad6ccae564f8b830ed0124a912da3aa56}{Prepare\+Data\+And\+Export}} (List$<$ \mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_data_objects_1_1_exchange_rates_table}{Exchange\+Rates\+Table}} $>$ exchange\+Rates\+Data, List$<$ string $>$ sorted\+Average\+Exchange\+Rates\+Dictionary)
+\begin{DoxyCompactList}\small\item\em Prepare and export data to excel file. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Responsible for exporting processed data to an \doxylink{namespace_average_exchange_rates_analyzer_1_1_helpers_1_1_excel}{Excel} file. Provides methods for creating and saving \doxylink{namespace_average_exchange_rates_analyzer_1_1_helpers_1_1_excel}{Excel} files with the given data. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter_aae6a2ca3e336e73466b5710bd5dcd6a9}\index{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter@{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter}!ExcelExporter@{ExcelExporter}}
+\index{ExcelExporter@{ExcelExporter}!AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter@{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter}}
+\doxysubsubsection{\texorpdfstring{ExcelExporter()}{ExcelExporter()}}
+{\footnotesize\ttfamily \label{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter_aae6a2ca3e336e73466b5710bd5dcd6a9} 
+Average\+Exchange\+Rates\+Analyzer.\+File\+Operations.\+Exporters.\+Excel\+Exporter.\+Excel\+Exporter (\begin{DoxyParamCaption}\item[{ILogger}]{logger}{, }\item[{Date\+Time}]{current\+Date}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Initializes a new instance of the \doxylink{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter}{Excel\+Exporter} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em logger} & Logger class. \\
+\hline
+{\em current\+Date} & Day data was downloaded. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter_ad6ccae564f8b830ed0124a912da3aa56}\index{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter@{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter}!PrepareDataAndExport@{PrepareDataAndExport}}
+\index{PrepareDataAndExport@{PrepareDataAndExport}!AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter@{AverageExchangeRatesAnalyzer.FileOperations.Exporters.ExcelExporter}}
+\doxysubsubsection{\texorpdfstring{PrepareDataAndExport()}{PrepareDataAndExport()}}
+{\footnotesize\ttfamily \label{class_average_exchange_rates_analyzer_1_1_file_operations_1_1_exporters_1_1_excel_exporter_ad6ccae564f8b830ed0124a912da3aa56} 
+void Average\+Exchange\+Rates\+Analyzer.\+File\+Operations.\+Exporters.\+Excel\+Exporter.\+Prepare\+Data\+And\+Export (\begin{DoxyParamCaption}\item[{List$<$ \mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_data_objects_1_1_exchange_rates_table}{Exchange\+Rates\+Table}} $>$}]{exchange\+Rates\+Data}{, }\item[{List$<$ string $>$}]{sorted\+Average\+Exchange\+Rates\+Dictionary}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Prepare and export data to excel file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em exchange\+Rates\+Data} & Downloaded exchange rates data. \\
+\hline
+{\em sorted\+Average\+Exchange\+Rates\+Dictionary} & Sorted list of average exchange rates from specific time. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/athos/source/repos/\+Average\+Exchange\+Rates\+Analyzer/\+File\+Operations/\+Exporters/\mbox{\hyperlink{_excel_exporter_8cs}{Excel\+Exporter.\+cs}}\end{DoxyCompactItemize}

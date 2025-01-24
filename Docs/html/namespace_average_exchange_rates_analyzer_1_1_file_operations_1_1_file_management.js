@@ -1,0 +1,4 @@
+var namespace_average_exchange_rates_analyzer_1_1_file_operations_1_1_file_management =
+[
+    [ "ReportFileManager", "class_average_exchange_rates_analyzer_1_1_file_operations_1_1_file_management_1_1_report_file_manager.html", "class_average_exchange_rates_analyzer_1_1_file_operations_1_1_file_management_1_1_report_file_manager" ]
+];

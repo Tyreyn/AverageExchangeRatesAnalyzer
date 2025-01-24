@@ -1,0 +1,63 @@
+\doxysection{Average\+Exchange\+Rates\+Analyzer.\+Data\+Access.\+Http\+Nbp\+Api\+Client Class Reference}
+\hypertarget{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client}{}\label{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client}\index{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient@{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient}}
+
+
+A client responsible for handling HTTP requests to the NBP API. Provides methods for retrieving from the API endpoints.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client_ac93aff657f8444fc9e239a8a69041858}{Http\+Nbp\+Api\+Client}} (ILogger logger)
+\begin{DoxyCompactList}\small\item\em Initializes a new instance of the \doxylink{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client}{Http\+Nbp\+Api\+Client} class. \end{DoxyCompactList}\item 
+async Task$<$(List$<$ \mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_data_objects_1_1_exchange_rates_table}{Exchange\+Rates\+Table}} $>$?, string)$>$ \mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client_a856b03feadac28735b90bd2cd99d83d5}{Get\+Exchange\+Rates}} (string start\+Date, string end\+Date)
+\begin{DoxyCompactList}\small\item\em Get data from NBP Api. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A client responsible for handling HTTP requests to the NBP API. Provides methods for retrieving from the API endpoints. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client_ac93aff657f8444fc9e239a8a69041858}\index{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient@{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient}!HttpNbpApiClient@{HttpNbpApiClient}}
+\index{HttpNbpApiClient@{HttpNbpApiClient}!AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient@{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient}}
+\doxysubsubsection{\texorpdfstring{HttpNbpApiClient()}{HttpNbpApiClient()}}
+{\footnotesize\ttfamily \label{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client_ac93aff657f8444fc9e239a8a69041858} 
+Average\+Exchange\+Rates\+Analyzer.\+Data\+Access.\+Http\+Nbp\+Api\+Client.\+Http\+Nbp\+Api\+Client (\begin{DoxyParamCaption}\item[{ILogger}]{logger}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Initializes a new instance of the \doxylink{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client}{Http\+Nbp\+Api\+Client} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em logger} & Logger class. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client_a856b03feadac28735b90bd2cd99d83d5}\index{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient@{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient}!GetExchangeRates@{GetExchangeRates}}
+\index{GetExchangeRates@{GetExchangeRates}!AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient@{AverageExchangeRatesAnalyzer.DataAccess.HttpNbpApiClient}}
+\doxysubsubsection{\texorpdfstring{GetExchangeRates()}{GetExchangeRates()}}
+{\footnotesize\ttfamily \label{class_average_exchange_rates_analyzer_1_1_data_access_1_1_http_nbp_api_client_a856b03feadac28735b90bd2cd99d83d5} 
+async Task$<$(List$<$ \mbox{\hyperlink{class_average_exchange_rates_analyzer_1_1_data_objects_1_1_exchange_rates_table}{Exchange\+Rates\+Table}} $>$?, string)$>$ Average\+Exchange\+Rates\+Analyzer.\+Data\+Access.\+Http\+Nbp\+Api\+Client.\+Get\+Exchange\+Rates (\begin{DoxyParamCaption}\item[{string}]{start\+Date}{, }\item[{string}]{end\+Date}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get data from NBP Api. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em start\+Date} & Start date in string. \\
+\hline
+{\em end\+Date} & End date in string. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+List of exchange rates from specific date. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/athos/source/repos/\+Average\+Exchange\+Rates\+Analyzer/\+Data\+Access/\mbox{\hyperlink{_http_nbp_api_client_8cs}{Http\+Nbp\+Api\+Client.\+cs}}\end{DoxyCompactItemize}

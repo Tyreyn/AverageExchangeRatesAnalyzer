@@ -34,3 +34,6 @@ Additional config arguments that could be added in appsettings.json
 
 ## Using 
 Download folder bin\Release\net9.0 and launch AverageExchangeRatesAnalyzer.exe or launch solution via IDE.
+
+## Docs
+HTML documentation can be find in Docs\html\index.html
