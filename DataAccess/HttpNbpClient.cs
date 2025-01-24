@@ -9,7 +9,7 @@ namespace AverageExchangeRatesAnalyzer.DataAccess
     /// A client responsible for handling HTTP requests to the NBP API.
     /// Provides methods for retrieving from the API endpoints.
     /// </summary>
-    public class HttpNbpApiClient
+    public class HttpNbpApiClient : IHttpNbpApiClient
     {
         /// <summary>
         /// NBP Api uri string.

@@ -1,13 +1,13 @@
 ﻿namespace AverageExchangeRatesAnalyzer.Samples
 {
 
-    public class SampleApiOutput
+    public static class SampleApiOutput
     {
 #pragma warning disable S1104 // Fields should not have public accessibility
         /// <summary>
         /// Request https://api.nbp.pl/api/exchangerates/tables/a/2025-01-15/2025-01-22/?format=json
         /// </summary>
-        public string SampleXmlOut2025_01_15_2025_01_22 = @"[
+        public static string SampleXmlOut2025_01_15_2025_01_22 = @"[
   {
     ""table"": ""A"",
     ""no"": ""009/A/NBP/2025"",

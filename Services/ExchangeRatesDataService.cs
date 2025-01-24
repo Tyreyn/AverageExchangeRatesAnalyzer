@@ -1,11 +1,5 @@
 ﻿using AverageExchangeRatesAnalyzer.DataObjects;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AverageExchangeRatesAnalyzer.Business
 {
@@ -13,29 +7,14 @@ namespace AverageExchangeRatesAnalyzer.Business
     /// <summary>
     /// Responsible for processing and transforming data retrieved from the NPB API.
     /// </summary>
-    public class ExchangeRatesDataService
+    public static class ExchangeRatesDataService
     {
-        /// <summary>
-        /// Logger class.
-        /// </summary>
-        private readonly ILogger? logger;
-
         /// <summary>
         /// Average exchange Rates Dictionary.
         /// Key: Currency name.
         /// Value: List of currency values.
         /// </summary>
-        private Dictionary<string, double> AverageExchangeRatesDictionary = new Dictionary<string, double>();
-
-        public ExchangeRatesDataService(ILogger logger, List<ExchangeRatesTable> exchangeRatesTables)
-        {
-            this.logger = logger;
-            using (this.logger.BeginScope("ExchangeRatesDataService"))
-            {
-                Dictionary<string, List<double>> collectedExchangeCurrency = CollectCurrencyToDictionary(exchangeRatesTables);
-                this.CalculateAverageRates(collectedExchangeCurrency);
-            }
-        }
+        private static Dictionary<string, double> AverageExchangeRatesDictionary = new Dictionary<string, double>();
 
         /// <summary>
         /// Sort average exchange rates dictionary.
@@ -45,9 +24,18 @@ namespace AverageExchangeRatesAnalyzer.Business
         /// Key: currency name.
         /// Value: average currency value for specific time.
         /// </returns>
-        public Dictionary<string, double> GetSortedAverageExchangeRatesDictionary()
+        public static List<string> GetSortedAverageExchangeRatesDictionary(ILogger logger, List<ExchangeRatesTable> exchangeRatesTables)
         {
-            return this.AverageExchangeRatesDictionary.OrderByDescending(currency => currency.Value).ToDictionary();
+            using (logger.BeginScope("Get sorted average exchange rates dictionary"))
+            {
+                Dictionary<string, List<double>> collectedExchangeCurrency = CollectCurrencyToDictionary(exchangeRatesTables, logger);
+                CalculateAverageRates(collectedExchangeCurrency, logger);
+            }
+            return AverageExchangeRatesDictionary
+                .OrderByDescending(currency => currency.Value)
+                .ToDictionary()
+                .Keys
+                .ToList();
         }
 
         /// <summary>
@@ -58,14 +46,16 @@ namespace AverageExchangeRatesAnalyzer.Business
         /// Key: Currency name.
         /// Value: List of currency values.
         /// </param>
-        private void CalculateAverageRates(Dictionary<string, List<double>> collectedExchangeCurrency)
+        private static void CalculateAverageRates(
+            Dictionary<string, List<double>> collectedExchangeCurrency,
+            ILogger logger)
         {
-            this.logger.LogInformation("Starting calculating currency to dictionary");
+            logger.LogInformation("Starting calculating currency to dictionary");
             foreach (var rate in collectedExchangeCurrency)
             {
                 double average = rate.Value.Sum(x => x) / rate.Value.Count();
                 AverageExchangeRatesDictionary[rate.Key] = average;
-                this.logger.LogDebug("Currency [{currencyName}] - average rate {currencyValue} ", rate.Key, average);
+                logger.LogDebug("Currency [{CurrencyName}] - average rate {CurrencyValue} ", rate.Key, average);
             }
         }
 
@@ -78,10 +68,12 @@ namespace AverageExchangeRatesAnalyzer.Business
         /// Key: Currency name.
         /// Value: List of currency values.
         /// </returns>
-        private Dictionary<string, List<double>> CollectCurrencyToDictionary(List<ExchangeRatesTable> exchangeRatesTables)
+        private static Dictionary<string, List<double>> CollectCurrencyToDictionary(
+            List<ExchangeRatesTable> exchangeRatesTables,
+            ILogger logger)
         {
             Dictionary<string, List<double>> tmpCollectedExchangeCurrency = new Dictionary<string, List<double>>();
-            this.logger.LogInformation("Starting colleting currency to dictionary");
+            logger.LogInformation("Starting colleting currency to dictionary");
             foreach (ExchangeRatesTable exchangeRatesTable in exchangeRatesTables)
             {
                 foreach (Rate rate in exchangeRatesTable.Rates)

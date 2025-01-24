@@ -1,7 +1,10 @@
 ﻿using AverageExchangeRatesAnalyzer.Business;
 using AverageExchangeRatesAnalyzer.DataAccess;
+using AverageExchangeRatesAnalyzer.DataObjects;
+using AverageExchangeRatesAnalyzer.FileOperations.Exporters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AverageExchangeRatesAnalyzer
 {
@@ -18,24 +21,9 @@ namespace AverageExchangeRatesAnalyzer
         private static HttpNbpApiClient httpNbpApiClient;
 
         /// <summary>
-        /// ExchangeRatesDataService service.
+        /// Configuration root.
         /// </summary>
-        private static ExchangeRatesDataService exchangeRatesDataService;
-
-        /// <summary>
-        /// Destination folder where raport will be stored.
-        /// </summary>
-        private static string DestinationFolder = Directory.GetCurrentDirectory();
-
-        /// <summary>
-        /// Indicates whether reports should be in single file.
-        /// </summary>
-        private static bool SingleFile = false;
-
-        /// <summary>
-        /// Indicates whether all reports are to be deleted.
-        /// </summary>
-        private static bool RaportCleanup = false;
+        private static IConfigurationRoot configuration;
 
         static void Main(string[] args)
         {
@@ -43,16 +31,17 @@ namespace AverageExchangeRatesAnalyzer
             logger.LogInformation("Starting script");
             DateTime currentDate = DateTime.UtcNow;
 
-            var response = httpNbpApiClient.GetExchangeRates(currentDate.AddDays(-7).ToString("yyyy-MM-dd"), currentDate.ToString("yyyy-MM-dd")).Result;
-
-            exchangeRatesDataService = new ExchangeRatesDataService(logger, response.Item1);
-            var sorted = exchangeRatesDataService.GetSortedAverageExchangeRatesDictionary();
+            //var response = httpNbpApiClient.GetExchangeRates(currentDate.AddDays(-7).ToString("yyyy-MM-dd"), currentDate.ToString("yyyy-MM-dd")).Result;
+            var response = JsonConvert.DeserializeObject<List<ExchangeRatesTable>>(Samples.SampleApiOutput.SampleXmlOut2025_01_15_2025_01_22);
+            List<string> sortedAverageExchangeRatesDictionary = ExchangeRatesDataService.GetSortedAverageExchangeRatesDictionary(logger, response);
+            ExcelExporter excelExporter = new ExcelExporter(logger, configuration);
+            excelExporter.PrepareDataAndExport(response, sortedAverageExchangeRatesDictionary);
 
         }
 
         private static void Startup()
         {
-            var configuration = new ConfigurationBuilder()
+            configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile($"appsettings.json", false, true)
                 .Build();
@@ -63,14 +52,7 @@ namespace AverageExchangeRatesAnalyzer
                     .AddConfiguration(configuration.GetSection("Logging"))
                     .AddSimpleConsole();
             });
-            string tmpDestinationFolder = configuration.GetValue<string>("DestinationFolder");
-            bool tmpSingleFile = configuration.GetValue<bool>("SingleFile");
-            bool tmpRaportCleanup = configuration.GetValue<bool>("RaportCleanup");
-            if (tmpDestinationFolder != null) DestinationFolder = tmpDestinationFolder;
-            if (tmpSingleFile != null) SingleFile = tmpSingleFile;
-            if (tmpRaportCleanup != null) RaportCleanup = tmpRaportCleanup;
             logger = loggerFactory.CreateLogger("Program");
-            logger.LogInformation("Files will be saved in {destination}", DestinationFolder);
             httpNbpApiClient = new HttpNbpApiClient(logger);
         }
     }
