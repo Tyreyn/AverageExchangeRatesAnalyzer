@@ -1,5 +1,5 @@
 # Average Exchange Rates Analyzer
-Console app that download, analyze and extract date to datasheet.
+Console app that download, analyze and extract date to datasheet. Sample output is in "Currency_rate_report_24012025.xlsx"
 
 ## Requirements
 Additional config arguments that could be added in appsettings.json
