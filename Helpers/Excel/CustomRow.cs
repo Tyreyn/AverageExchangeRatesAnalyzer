@@ -2,10 +2,19 @@
 
 namespace AverageExchangeRatesAnalyzer.Helpers.Excel
 {
+    /// <summary>
+    /// Custom row class.
+    /// </summary>
     public class CustomRow()
     {
-        public Row Row = new Row();
+        /// <summary>
+        /// Gets or sets row class.
+        /// </summary>
+        public Row Row { get; set; } = new();
 
-        public int CellPointer = 0;
+        /// <summary>
+        /// Gets or sets current cell in row pointer.
+        /// </summary>
+        public int CellPointer { get; set; } = 0;
     }
 }

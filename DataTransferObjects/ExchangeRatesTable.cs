@@ -12,23 +12,23 @@ namespace AverageExchangeRatesAnalyzer.DataObjects
     public class ExchangeRatesTable
     {
         /// <summary>
-        /// Table type.
+        /// Gets or sets table type.
         /// </summary>
         public required string Table { get; set; }
 
         /// <summary>
-        /// Table number.
+        /// Gets or sets table number.
         /// </summary>
         public required string No { get; set; }
 
         /// <summary>
-        /// Publication date.
+        /// Gets or sets publication date.
         /// </summary>
         public required DateTime EffectiveDate { get; set; }
 
         /// <summary>
-        /// List of rates.
+        /// Gets or sets list of rates.
         /// </summary>
-        public virtual required IList<Rate> Rates {get; set;}
+        public virtual required IList<Rate> Rates { get; set; }
     }
 }

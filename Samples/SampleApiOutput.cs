@@ -1,13 +1,14 @@
 ﻿namespace AverageExchangeRatesAnalyzer.Samples
 {
-
+    /// <summary>
+    /// Sample Api outputs.
+    /// </summary>
     public static class SampleApiOutput
     {
-#pragma warning disable S1104 // Fields should not have public accessibility
         /// <summary>
-        /// Request https://api.nbp.pl/api/exchangerates/tables/a/2025-01-15/2025-01-22/?format=json
+        /// Request https://api.nbp.pl/api/exchangerates/tables/a/2025-01-15/2025-01-22/?format=json.
         /// </summary>
-        public static string SampleXmlOut2025_01_15_2025_01_22 = @"[
+        public static readonly string SampleXmlOut2025011520250122 = @"[
   {
     ""table"": ""A"",
     ""no"": ""009/A/NBP/2025"",
@@ -870,5 +871,4 @@
   }
 ]";
     }
-#pragma warning restore S1104 // Fields should not have public accessibility
 }

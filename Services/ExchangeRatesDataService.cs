@@ -3,35 +3,37 @@ using Microsoft.Extensions.Logging;
 
 namespace AverageExchangeRatesAnalyzer.Business
 {
-
     /// <summary>
     /// Responsible for processing and transforming data retrieved from the NPB API.
     /// </summary>
     public static class ExchangeRatesDataService
     {
         /// <summary>
-        /// Average exchange Rates Dictionary.
-        /// Key: Currency name.
-        /// Value: List of currency values.
-        /// </summary>
-        private static Dictionary<string, double> AverageExchangeRatesDictionary = new Dictionary<string, double>();
-
-        /// <summary>
         /// Sort average exchange rates dictionary.
         /// </summary>
+        /// <param name="logger">
+        /// Logger class.
+        /// </param>
+        /// <param name="exchangeRatesTables">
+        /// Downloaded exchange rates data.
+        /// </param>
         /// <returns>
         /// Sorted average exchange rates dictionary.
         /// Key: currency name.
         /// Value: average currency value for specific time.
         /// </returns>
-        public static List<string> GetSortedAverageExchangeRatesDictionary(ILogger logger, List<ExchangeRatesTable> exchangeRatesTables)
+        public static List<string> GetSortedAverageExchangeRatesDictionary(
+            ILogger logger,
+            List<ExchangeRatesTable> exchangeRatesTables)
         {
+            Dictionary<string, double> averageExchangeRatesDictionary = new();
             using (logger.BeginScope("Get sorted average exchange rates dictionary"))
             {
                 Dictionary<string, List<double>> collectedExchangeCurrency = CollectCurrencyToDictionary(exchangeRatesTables, logger);
-                CalculateAverageRates(collectedExchangeCurrency, logger);
+                averageExchangeRatesDictionary = CalculateAverageRates(collectedExchangeCurrency, logger);
             }
-            return AverageExchangeRatesDictionary
+
+            return averageExchangeRatesDictionary
                 .OrderByDescending(currency => currency.Value)
                 .ToDictionary()
                 .Keys
@@ -46,23 +48,39 @@ namespace AverageExchangeRatesAnalyzer.Business
         /// Key: Currency name.
         /// Value: List of currency values.
         /// </param>
-        private static void CalculateAverageRates(
+        /// <returns>
+        /// Average exchange Rates Dictionary.
+        /// Key: Currency name.
+        /// Value: List of currency values.
+        /// </returns>
+        private static Dictionary<string, double> CalculateAverageRates(
             Dictionary<string, List<double>> collectedExchangeCurrency,
             ILogger logger)
         {
             logger.LogInformation("Starting calculating currency to dictionary");
+            Dictionary<string, double> averageExchangeRatesDictionary = new();
             foreach (var rate in collectedExchangeCurrency)
             {
-                double average = rate.Value.Sum(x => x) / rate.Value.Count();
-                AverageExchangeRatesDictionary[rate.Key] = average;
+                // SDR (MFW) XDR - Special drawing rights
+                if (rate.Key == "XDR")
+                {
+                    continue;
+                }
+
+                double average = rate.Value.Sum(x => x) / rate.Value.Count;
+                averageExchangeRatesDictionary[rate.Key] = average;
                 logger.LogDebug("Currency [{CurrencyName}] - average rate {CurrencyValue} ", rate.Key, average);
             }
+
+            return averageExchangeRatesDictionary;
         }
 
         /// <summary>
         /// Collect and sort requested data from specific time.
         /// </summary>
-        /// <param name="exchangeRatesTables"></param>
+        /// <param name="exchangeRatesTables">
+        /// Downloaded data.
+        /// </param>
         /// <returns>
         /// Exchange Rates Dictionary.
         /// Key: Currency name.
@@ -91,6 +109,5 @@ namespace AverageExchangeRatesAnalyzer.Business
 
             return tmpCollectedExchangeCurrency;
         }
-
     }
 }

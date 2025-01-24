@@ -1,7 +1,7 @@
-﻿using AverageExchangeRatesAnalyzer.DataObjects;
-using Microsoft.Extensions.Logging;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using AverageExchangeRatesAnalyzer.DataObjects;
+using Microsoft.Extensions.Logging;
 
 namespace AverageExchangeRatesAnalyzer.DataAccess
 {
@@ -9,7 +9,7 @@ namespace AverageExchangeRatesAnalyzer.DataAccess
     /// A client responsible for handling HTTP requests to the NBP API.
     /// Provides methods for retrieving from the API endpoints.
     /// </summary>
-    public class HttpNbpApiClient : IHttpNbpApiClient
+    public class HttpNbpApiClient
     {
         /// <summary>
         /// NBP Api uri string.
@@ -21,6 +21,12 @@ namespace AverageExchangeRatesAnalyzer.DataAccess
         /// </summary>
         private readonly ILogger? logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpNbpApiClient"/> class.
+        /// </summary>
+        /// <param name="logger">
+        /// Logger class.
+        /// </param>
         public HttpNbpApiClient(ILogger logger)
         {
             this.logger = logger;
@@ -39,7 +45,7 @@ namespace AverageExchangeRatesAnalyzer.DataAccess
         /// <returns>
         /// List of exchange rates from specific date.
         /// </returns>
-        public async Task<(List<ExchangeRatesTable>, string)> GetExchangeRates(string startDate, string endDate)
+        public async Task<(List<ExchangeRatesTable>?, string)> GetExchangeRates(string startDate, string endDate)
         {
             using (var client = new HttpClient())
             {
@@ -47,6 +53,7 @@ namespace AverageExchangeRatesAnalyzer.DataAccess
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+                this.logger.LogInformation("Sending request {0}", UriString + $"{startDate}/{endDate}");
                 HttpResponseMessage response = await client.GetAsync($"{startDate}/{endDate}");
 
                 if (response.IsSuccessStatusCode)
@@ -64,7 +71,7 @@ namespace AverageExchangeRatesAnalyzer.DataAccess
                 }
                 else
                 {
-                    this.logger.LogCritical(response.StatusCode.ToString());
+                    this.logger?.LogCritical(response.StatusCode.ToString());
                     return (null, response.StatusCode.ToString());
                 }
             }

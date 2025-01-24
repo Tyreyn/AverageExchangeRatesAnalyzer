@@ -12,17 +12,17 @@ namespace AverageExchangeRatesAnalyzer.DataObjects
     public class Rate
     {
         /// <summary>
-        /// Currency name.
+        /// Gets or sets currency name.
         /// </summary>
-        public required string Currency {get;set;}
+        public required string Currency { get; set; }
 
         /// <summary>
-        /// Currency code.
+        /// Gets or sets currency code.
         /// </summary>
         public required string Code { get; set; }
 
         /// <summary>
-        /// Converted average currency rate.
+        /// Gets or sets converted average currency rate.
         /// </summary>
         public required float Mid { get; set; }
     }

@@ -1,14 +1,18 @@
-﻿using AverageExchangeRatesAnalyzer.Business;
-using AverageExchangeRatesAnalyzer.DataAccess;
-using AverageExchangeRatesAnalyzer.DataObjects;
-using AverageExchangeRatesAnalyzer.FileOperations.Exporters;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-
-namespace AverageExchangeRatesAnalyzer
+﻿namespace AverageExchangeRatesAnalyzer
 {
-    static class Program
+    using AverageExchangeRatesAnalyzer.Business;
+    using AverageExchangeRatesAnalyzer.DataAccess;
+    using AverageExchangeRatesAnalyzer.DataObjects;
+    using AverageExchangeRatesAnalyzer.FileOperations.Exporters;
+    using AverageExchangeRatesAnalyzer.FileOperations.FileManagement;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
+
+    /// <summary>
+    /// Main class.
+    /// </summary>
+    internal static class Program
     {
         /// <summary>
         /// Logger class.
@@ -18,27 +22,53 @@ namespace AverageExchangeRatesAnalyzer
         /// <summary>
         /// HttpNbpApiClient class.
         /// </summary>
-        private static HttpNbpApiClient httpNbpApiClient;
+        private static HttpNbpApiClient? httpNbpApiClient;
 
         /// <summary>
         /// Configuration root.
         /// </summary>
-        private static IConfigurationRoot configuration;
+        private static IConfigurationRoot? configuration;
 
-        static void Main(string[] args)
+        /// <summary>
+        /// Main method.
+        /// </summary>
+        /// <param name="args">
+        /// Launch arguments.
+        /// </param>
+        private static void Main(string[] args)
         {
             Startup();
-            logger.LogInformation("Starting script");
             DateTime currentDate = DateTime.UtcNow;
 
-            //var response = httpNbpApiClient.GetExchangeRates(currentDate.AddDays(-7).ToString("yyyy-MM-dd"), currentDate.ToString("yyyy-MM-dd")).Result;
-            var response = JsonConvert.DeserializeObject<List<ExchangeRatesTable>>(Samples.SampleApiOutput.SampleXmlOut2025_01_15_2025_01_22);
-            List<string> sortedAverageExchangeRatesDictionary = ExchangeRatesDataService.GetSortedAverageExchangeRatesDictionary(logger, response);
-            ExcelExporter excelExporter = new ExcelExporter(logger, configuration);
-            excelExporter.PrepareDataAndExport(response, sortedAverageExchangeRatesDictionary);
+            if (httpNbpApiClient != null && logger != null && configuration != null)
+            {
+                (List<ExchangeRatesTable>?, string) response = httpNbpApiClient.GetExchangeRates(
+                    currentDate.AddDays(-7).ToString("yyyy-MM-dd"),
+                    currentDate.ToString("yyyy-MM-dd")).Result;
+                if (response.Item1 == null)
+                {
+                    logger.LogCritical("Something went wrong!");
+                }
+                else
+                {
+                    List<string> sortedAverageExchangeRatesDictionary = ExchangeRatesDataService.GetSortedAverageExchangeRatesDictionary(logger, response.Item1);
 
+                    ExcelExporter excelExporter = new ExcelExporter(logger, currentDate);
+                    excelExporter.PrepareDataAndExport(response.Item1, sortedAverageExchangeRatesDictionary);
+
+                    ReportFileManager reportFileManager = new ReportFileManager(logger, configuration, currentDate);
+                    reportFileManager.PerformManagementOfNewReport();
+                }
+            }
+            else
+            {
+                logger?.LogCritical("Something went wrong!");
+            }
         }
 
+        /// <summary>
+        /// Initialize required objects.
+        /// </summary>
         private static void Startup()
         {
             configuration = new ConfigurationBuilder()
@@ -53,6 +83,7 @@ namespace AverageExchangeRatesAnalyzer
                     .AddSimpleConsole();
             });
             logger = loggerFactory.CreateLogger("Program");
+            logger.LogInformation("Starting script");
             httpNbpApiClient = new HttpNbpApiClient(logger);
         }
     }

@@ -1,20 +1,16 @@
-﻿using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using AverageExchangeRatesAnalyzer.DataObjects;
-using DocumentFormat.OpenXml.Drawing.Spreadsheet;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using AverageExchangeRatesAnalyzer.DataObjects;
 using AverageExchangeRatesAnalyzer.Helpers.Excel;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Extensions.Logging;
 
 namespace AverageExchangeRatesAnalyzer.FileOperations.Exporters
 {
+    /// <summary>
+    /// Responsible for exporting processed data to an Excel file.
+    /// Provides methods for creating and saving Excel files with the given data.
+    /// </summary>
     public class ExcelExporter
     {
         /// <summary>
@@ -23,34 +19,9 @@ namespace AverageExchangeRatesAnalyzer.FileOperations.Exporters
         private readonly ILogger? logger;
 
         /// <summary>
-        /// Indicates whether reports should be in single file.
+        /// Day data was downloaded.
         /// </summary>
-        private bool SingleFile = false;
-
-        /// <summary>
-        /// Indicates whether all reports are to be deleted.
-        /// </summary>
-        private bool RaportCleanup = false;
-
-        /// <summary>
-        /// Default name of exported file.
-        /// </summary>
-        private string RaportFileName = "Currency_rate_raport";
-
-        /// <summary>
-        /// Default name of raports folder.
-        /// </summary>
-        private string RaportFolderName = "Raports";
-
-        /// <summary>
-        /// Destination folder where raport will be stored.
-        /// </summary>
-        private static string DestinationFolder = Directory.GetCurrentDirectory();
-
-        /// <summary>
-        /// Configuration root.
-        /// </summary>
-        private IConfigurationRoot configuration;
+        private readonly DateTime currentDate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExcelExporter"/> class.
@@ -58,30 +29,41 @@ namespace AverageExchangeRatesAnalyzer.FileOperations.Exporters
         /// <param name="logger">
         /// Logger class.
         /// </param>
-        public ExcelExporter(ILogger logger, IConfigurationRoot configuration)
+        /// <param name="currentDate">
+        /// Day data was downloaded.
+        /// </param>
+        public ExcelExporter(ILogger logger, DateTime currentDate)
         {
             this.logger = logger;
-            this.configuration = configuration;
+            this.currentDate = currentDate;
             this.logger.LogInformation("Initializing ExcelExporter");
-            this.LoadSettings();
         }
 
+        /// <summary>
+        /// Prepare and export data to excel file.
+        /// </summary>
+        /// <param name="exchangeRatesData">
+        /// Downloaded exchange rates data.
+        /// </param>
+        /// <param name="sortedAverageExchangeRatesDictionary">
+        /// Sorted list of average exchange rates from specific time.
+        /// </param>
         public void PrepareDataAndExport(
-            List<ExchangeRatesTable> ExchangeRatesData,
+            List<ExchangeRatesTable> exchangeRatesData,
             List<string> sortedAverageExchangeRatesDictionary)
         {
-            using (this.logger.BeginScope("Export data"))
+            using (this.logger?.BeginScope("Export data"))
             {
                 try
                 {
-                    this.logger.LogInformation("Creating excel spreadsheet");
+                    this.logger?.LogInformation("Creating excel spreadsheet");
                     SpreadsheetDocument excel = SpreadsheetDocument.Create("tmp.xlsx", SpreadsheetDocumentType.Workbook);
                     WorkbookPart workbookpart = excel.AddWorkbookPart();
                     workbookpart.Workbook = new Workbook();
                     WorksheetPart worksheetPart = workbookpart.AddNewPart<WorksheetPart>();
                     worksheetPart.Worksheet = new Worksheet();
 
-                    SheetData data = CreateSheetData(ExchangeRatesData, sortedAverageExchangeRatesDictionary);
+                    SheetData data = this.CreateSheetData(exchangeRatesData, sortedAverageExchangeRatesDictionary);
                     Columns columns = ExcelExporterHelper.AutoSizeCells(data);
 
                     worksheetPart.Worksheet.Append(columns);
@@ -91,54 +73,70 @@ namespace AverageExchangeRatesAnalyzer.FileOperations.Exporters
                     stylesPart.Stylesheet = ExcelExporterHelper.CreateStyleSheet();
                     stylesPart.Stylesheet.Save();
 
-                    Sheets sheets = excel.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+                    Sheets sheets = excel?.WorkbookPart?.Workbook.AppendChild<Sheets>(new Sheets());
 
-                    sheets.Append(new Sheet()
-                    {
-                        Id = excel.WorkbookPart.GetIdOfPart(worksheetPart),
-                        SheetId = 1,
-                        Name = "Raport"
-                    });
+                    sheets?.Append(
+                        new Sheet()
+                        {
+                            Id = excel?.WorkbookPart?.GetIdOfPart(worksheetPart),
+                            SheetId = 1,
+                            Name = "report",
+                        });
 
-                    //Save & close
+                    // Save & close
                     workbookpart.Workbook.Save();
-                    excel.Dispose();
+                    excel?.Dispose();
                 }
                 catch (IOException ioExc)
                 {
-                    this.logger.LogCritical(ioExc.Message);
+                    this.logger?.LogCritical(ioExc.Message);
                 }
             }
         }
 
+        /// <summary>
+        /// Create sheet data.
+        /// </summary>
+        /// <param name="exchangeRatesData">
+        /// Downloaded exchange rates data.
+        /// </param>
+        /// <param name="sortedAverageExchangeRates">
+        /// Sorted list of average exchange rates from specific time.
+        /// </param>
+        /// <returns>
+        /// Created sheet data.
+        /// </returns>
         private SheetData CreateSheetData(
-            List<ExchangeRatesTable> ExchangeRatesData,
+            List<ExchangeRatesTable> exchangeRatesData,
             List<string> sortedAverageExchangeRates)
         {
-            string highest = sortedAverageExchangeRates[0];
-            this.logger.LogInformation("Creating sheet data");
-            DateTime startDate = DateTime.UtcNow.AddDays(-7);
+            this.logger?.LogInformation("Creating sheet data");
             Dictionary<string, CustomRow> excelRowDictionary = new Dictionary<string, CustomRow>();
             excelRowDictionary.Add("Header", new CustomRow());
             SheetData data = new SheetData();
-            for (DateTime currentDate = DateTime.UtcNow.AddDays(-7); currentDate < DateTime.UtcNow; currentDate = currentDate.AddDays(1.0))
+            for (DateTime currentDay = this.currentDate.AddDays(-7); currentDay <= this.currentDate; currentDay = currentDay.AddDays(1.0))
             {
-                this.logger.LogInformation("Filling column {0}", currentDate);
-                if (excelRowDictionary.Count <= 1) PrepareFirstColumn(excelRowDictionary, ExchangeRatesData[0], sortedAverageExchangeRates);
-                ExchangeRatesTable currentDayExchangeRatesData = ExchangeRatesData.Where(root => root.EffectiveDate == currentDate.Date).FirstOrDefault();
+                this.logger?.LogInformation("Filling column {0}", currentDay);
+                if (excelRowDictionary.Count <= 1)
+                {
+                    this.PrepareFirstColumn(excelRowDictionary, exchangeRatesData[0], sortedAverageExchangeRates);
+                }
+
+                ExchangeRatesTable currentDayExchangeRatesData = exchangeRatesData.FirstOrDefault(root => root.EffectiveDate == currentDay.Date);
                 if (currentDayExchangeRatesData == null)
                 {
-                    FillDayOffColumn(currentDate, excelRowDictionary, sortedAverageExchangeRates);
+                    this.FillDayOffColumn(currentDay, excelRowDictionary, sortedAverageExchangeRates);
                 }
                 else
                 {
-                    InsertHeaderCell(excelRowDictionary["Header"].Row,
+                    this.InsertHeaderCell(
+                        excelRowDictionary["Header"].Row,
                         currentDayExchangeRatesData.EffectiveDate.ToOADate().ToString(),
                         excelRowDictionary["Header"].CellPointer++);
 
                     foreach (Rate rate in currentDayExchangeRatesData.Rates)
                     {
-                        InsertNumberCell(
+                        this.InsertNumberCell(
                             excelRowDictionary[rate.Code].Row,
                             rate.Mid,
                             excelRowDictionary[rate.Code].CellPointer++,
@@ -147,8 +145,9 @@ namespace AverageExchangeRatesAnalyzer.FileOperations.Exporters
                 }
             }
 
+            this.PrepareLegendRows(excelRowDictionary);
             int rowId = 0;
-            this.logger.LogInformation("Inserting data to sheet");
+            this.logger?.LogInformation("Inserting data to sheet");
             foreach (KeyValuePair<string, CustomRow> keyValuePair in excelRowDictionary)
             {
                 data.InsertAt(keyValuePair.Value.Row, rowId++);
@@ -157,48 +156,116 @@ namespace AverageExchangeRatesAnalyzer.FileOperations.Exporters
             return data;
         }
 
+        /// <summary>
+        /// Prepare legend rows.
+        /// </summary>
+        /// <param name="excelRowDictionary">
+        /// Key: rate code name
+        /// Value: custom row.
+        /// </param>
+        private void PrepareLegendRows(Dictionary<string, CustomRow> excelRowDictionary)
+        {
+            excelRowDictionary.Add("Highest", new CustomRow());
+            this.InsertTextCell(
+                excelRowDictionary["Highest"].Row,
+                "najwyższa średnia",
+                excelRowDictionary["Highest"].CellPointer++,
+                9);
+            excelRowDictionary.Add("SHighest", new CustomRow());
+            this.InsertTextCell(
+                excelRowDictionary["SHighest"].Row,
+                "druga najwyższa średnia",
+                excelRowDictionary["SHighest"].CellPointer++,
+                10);
+            excelRowDictionary.Add("Lowest", new CustomRow());
+            this.InsertTextCell(
+                excelRowDictionary["Lowest"].Row,
+                "najniższa średnia",
+                excelRowDictionary["Lowest"].CellPointer++,
+                11);
+            excelRowDictionary.Add("SLowest", new CustomRow());
+            this.InsertTextCell(
+                excelRowDictionary["SLowest"].Row,
+                "druga najniższa średnia",
+                excelRowDictionary["SLowest"].CellPointer++,
+                12);
+        }
 
+        /// <summary>
+        /// Prepare fist Column.
+        /// </summary>
+        /// <param name="excelRowDictionary">
+        /// Key: rate code name
+        /// Value: custom row.
+        /// </param>
+        /// <param name="exchangeRatesData">
+        /// Downloaded exchange rates data.
+        /// </param>
+        /// <param name="sortedAverageExchangeRates">
+        /// Sorted list of average exchange rates from specific time.
+        /// </param>
         private void PrepareFirstColumn(
             Dictionary<string, CustomRow> excelRowDictionary,
-            ExchangeRatesTable ExchangeRatesData,
+            ExchangeRatesTable exchangeRatesData,
             List<string> sortedAverageExchangeRates)
         {
-            this.logger.LogInformation("Preparing first column based on {0} data", ExchangeRatesData.EffectiveDate);
-            InsertTextCell(excelRowDictionary["Header"].Row, string.Empty, excelRowDictionary["Header"].CellPointer++);
+            this.logger?.LogInformation("Preparing first column based on {0} data", exchangeRatesData.EffectiveDate);
 
-            foreach (Rate rate in ExchangeRatesData.Rates)
+            this.InsertTextCell(
+                excelRowDictionary["Header"].Row,
+                string.Empty,
+                excelRowDictionary["Header"].CellPointer++);
+
+            foreach (Rate rate in exchangeRatesData.Rates)
             {
                 if (!excelRowDictionary.ContainsKey(rate.Code))
                 {
                     excelRowDictionary.Add(rate.Code, new CustomRow());
-                    InsertTextCell(excelRowDictionary[rate.Code].Row,
+                    this.InsertTextCell(
+                        excelRowDictionary[rate.Code].Row,
                         string.Format("{0} ({1})", rate.Currency, rate.Code),
                         excelRowDictionary[rate.Code].CellPointer++,
-                        ExcelExporterHelper.FindTextCellStyleIndex(sortedAverageExchangeRates, rate.Code));
+                        ExcelExporterHelper.FindTextCellStyleIndex(
+                            sortedAverageExchangeRates,
+                            rate.Code));
                 }
             }
         }
 
+        /// <summary>
+        /// Fill row with day off values.
+        /// </summary>
+        /// <param name="currentDate">
+        /// Current date.
+        /// </param>
+        /// <param name="excelRowDictionary">
+        /// Key: rate code name
+        /// Value: custom row.
+        /// </param>
+        /// <param name="sortedAverageExchangeRates">
+        /// Sorted list of average exchange rates from specific time.
+        /// </param>
         private void FillDayOffColumn(
             DateTime currentDate,
             Dictionary<string, CustomRow> excelRowDictionary,
             List<string> sortedAverageExchangeRates)
         {
-            uint HeaderdayOffStyleIndex = 4;
-            this.logger.LogInformation("{0} was day off", currentDate);
+            uint headerdayOffStyleIndex = 4;
+            this.logger?.LogInformation("{0} was day off", currentDate);
             foreach (KeyValuePair<string, CustomRow> keyValuePair in excelRowDictionary)
             {
                 if (keyValuePair.Key == "Header")
                 {
-                    InsertHeaderCell(
+                    this.InsertHeaderCell(
                         excelRowDictionary[keyValuePair.Key].Row,
                         currentDate.ToOADate().ToString(),
                         excelRowDictionary[keyValuePair.Key].CellPointer++,
-                        HeaderdayOffStyleIndex);
+                        headerdayOffStyleIndex);
                 }
                 else
                 {
-                    InsertTextCell(excelRowDictionary[keyValuePair.Key].Row,
+                    this.InsertTextCell(
+                        excelRowDictionary[keyValuePair.Key].Row,
                         "Dzień wolny",
                         excelRowDictionary[keyValuePair.Key].CellPointer++,
                         ExcelExporterHelper.FindTextCellStyleIndex(sortedAverageExchangeRates, keyValuePair.Key, true));
@@ -206,53 +273,85 @@ namespace AverageExchangeRatesAnalyzer.FileOperations.Exporters
             }
         }
 
+        /// <summary>
+        /// Insert header cell to row.
+        /// </summary>
+        /// <param name="row">
+        /// Row to which  add a cell.
+        /// </param>
+        /// <param name="content">
+        /// Cell value.
+        /// </param>
+        /// <param name="cellIndex">
+        /// Cell index.
+        /// </param>
+        /// <param name="styleIndex">
+        /// Cell style index.
+        /// </param>
         private void InsertHeaderCell(Row row, string content, int cellIndex, uint styleIndex = 1)
         {
-            row.InsertAt<Cell>(new Cell()
-            {
-                DataType = CellValues.Number,
-                CellValue = new CellValue(content),
-                StyleIndex = styleIndex
-            }, cellIndex);
+            row.InsertAt<Cell>(
+                new Cell()
+                {
+                    DataType = CellValues.Number,
+                    CellValue = new CellValue(content),
+                    StyleIndex = styleIndex,
+                },
+                cellIndex);
         }
 
+        /// <summary>
+        /// Insert text cell to row.
+        /// </summary>
+        /// <param name="row">
+        /// Row to which  add a cell.
+        /// </param>
+        /// <param name="content">
+        /// Cell value.
+        /// </param>
+        /// <param name="cellIndex">
+        /// Cell index.
+        /// </param>
+        /// <param name="styleIndex">
+        /// Cell style index.
+        /// </param>
         private void InsertTextCell(Row row, string content, int cellIndex, uint styleIndex = 3)
         {
-            row.InsertAt<Cell>(new Cell()
-            { 
-                DataType = CellValues.String,
-                CellValue = new CellValue(content),
-                StyleIndex = styleIndex 
-            }, cellIndex);
+            row.InsertAt<Cell>(
+                new Cell()
+                {
+                    DataType = CellValues.String,
+                    CellValue = new CellValue(content),
+                    StyleIndex = styleIndex,
+                },
+                cellIndex);
         }
 
+        /// <summary>
+        /// Insert number cell to row.
+        /// </summary>
+        /// <param name="row">
+        /// Row to which  add a cell.
+        /// </param>
+        /// <param name="content">
+        /// Cell value.
+        /// </param>
+        /// <param name="cellIndex">
+        /// Cell index.
+        /// </param>
+        /// <param name="styleIndex">
+        /// Cell style index.
+        /// </param>
         private void InsertNumberCell(Row row, double content, int cellIndex, uint styleIndex = 2)
         {
-            row.InsertAt<Cell>(new Cell() 
-            {
-                DataType = CellValues.Number,
-                CellValue = new CellValue(content),
-                StyleIndex = styleIndex 
-            }, cellIndex);
-        }
-
-        private void LoadSettings()
-        {
-            string tmpRaportFolderName = configuration.GetValue<string>("RaportFolderName");
-            string tmpRaportFileName = configuration.GetValue<string>("RaportFileName");
-            string tmpDestinationFolder = configuration.GetValue<string>("DestinationFolder");
-            bool tmpSingleFile = configuration.GetValue<bool>("SingleFile");
-            bool tmpRaportCleanup = configuration.GetValue<bool>("RaportCleanup");
-            if (tmpDestinationFolder != null) DestinationFolder = tmpDestinationFolder;
-            if (tmpSingleFile != null) SingleFile = tmpSingleFile;
-            if (tmpRaportCleanup != null) RaportCleanup = tmpRaportCleanup;
-            if (tmpRaportFileName != null) RaportFileName = tmpRaportFileName;
-            if (tmpRaportFolderName != null) RaportFolderName = tmpRaportFolderName;
-
-            this.logger.LogInformation("Files will be saved in {destination}/<month_name>", Path.Combine(DestinationFolder, RaportFolderName));
-            this.logger.LogInformation("File name will be {fileName}_<end_date>", RaportFileName);
-            if (SingleFile) this.logger.LogInformation("Single File Mode", DestinationFolder);
-            if (RaportCleanup) this.logger.LogInformation("All raports will be deleted", DestinationFolder);
+            row.InsertAt<Cell>(
+                new Cell()
+                {
+                    DataType = CellValues.Number,
+                    CellValue = new CellValue(content),
+                    StyleIndex = styleIndex,
+                },
+                cellIndex);
         }
     }
 }
